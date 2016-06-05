@@ -54,7 +54,7 @@ public class Plus10Drive {
         GDOperations.downloadFile(service, metaDataId, metaDataPath);
 
         res.importFrom(metaDataPath);
-/*
+
         for (MetaData md : res.getMetaData()) {
             String fileId = GDOperations.getFileId(service, folderId, md.getName());
             if (null != fileId) {
@@ -64,12 +64,12 @@ public class Plus10Drive {
                 throw new FileNotFoundException(md.getName());
             }
         }
-*/
+
         return res;
     }
 
     private static void upload(Drive service, String gdParent, String filePath) throws IOException {
-        final String uploadTemp = "/temp/upload";
+        final String uploadTemp = "/Work/temp/Plus10Drive/upload";
 
         File f = new File(filePath);
         if (!f.exists()) {
@@ -95,7 +95,7 @@ public class Plus10Drive {
     }
 
     private static void download(Drive service, String gdParent, String fileName, String targetFile) throws IOException{
-        final String downloadTemp = "/temp/download";
+        final String downloadTemp = "/Work/temp/Plus10Drive/download";
 
         String downloadFolderId = GDOperations.getFolderId(service, gdParent, fileName);
         EncodeResult res1 = downloadEncodedFiles(service, downloadFolderId, downloadTemp);
@@ -114,11 +114,11 @@ public class Plus10Drive {
             appFolderId = GDOperations.createFolder(service, "root", "Plus10Drive");
         }
 
-        //upload(service, appFolderId, filePath);
-        download(service, appFolderId, new File(filePath).getName(), "/temp/target.dat");
+        upload(service, appFolderId, filePath);
+        download(service, appFolderId, new File(filePath).getName(), "/Work/temp/Plus10Drive/New Pic.JPG");
     }
 
     public static void main(String[] args) throws IOException {
-        DriveWork("/temp/source.dat");
+        DriveWork("/Work/temp/Plus10Drive/P1070953.JPG");
     }
 }
