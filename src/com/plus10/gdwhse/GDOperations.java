@@ -61,21 +61,6 @@ public final class GDOperations {
         fileMetaData.setName(title);
         fileMetaData.setMimeType("application/vnd.google-apps.folder");
 
-        /*
-        File.ContentHints.Thumbnail tn = new File.ContentHints.Thumbnail();
-        java.nio.file.Path path = java.nio.file.Paths.get("/temp/plus10.png");
-        try {
-            byte[] contents = java.nio.file.Files.readAllBytes(path);
-            tn.encodeImage(contents);
-        }catch(IOException e) {
-            e.printStackTrace();
-        }
-
-        File.ContentHints ch = new File.ContentHints();
-        ch.setThumbnail(tn);
-        fileMetaData.setContentHints(ch);
-        */
-
         File file=null;
         try
         {
