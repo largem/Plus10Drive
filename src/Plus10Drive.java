@@ -114,7 +114,8 @@ public class Plus10Drive {
             appFolderId = GDOperations.createFolder(service, "root", "Plus10Drive");
         }
 
-        //upload(service, appFolderId, filePath);
+
+        upload(service, appFolderId, filePath);
         download(service, appFolderId, new File(filePath).getName(), "/temp/target.dat");
     }
 
