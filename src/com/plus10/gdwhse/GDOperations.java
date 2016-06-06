@@ -101,6 +101,20 @@ public final class GDOperations {
         return null;
     }
 
+    public static List<File> getSubFolders(Drive service, String parentId) {
+        try {
+            FileList result = service.files().list()
+                    .setQ("'"+parentId+"' in parents and trashed=false and mimeType='application/vnd.google-apps.folder'")       //https://developers.google.com/drive/v3/web/search-parameters
+                    .execute();
+
+            return result.getFiles();
+
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static String getFileId(Drive service, String parentId, String name)    {
         return getId(service, parentId, name, "application/vnd.google-apps.document");
     }
