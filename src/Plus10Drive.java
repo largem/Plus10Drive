@@ -31,6 +31,9 @@ public class Plus10Drive {
         //TestUpLoad(service);
         //TestDownload(service);
 
+        String appFolderId = GDOperations.getFolderId(service, "root", "Plus10Drive");
+        GDOperations.renameFolder(service, appFolderId, "Plus10Drive");
+
         GDNode root = new GDNode("root", "Plus10 Drive", 0, 0, false);
         Plus10DriveHelper.populateNodeTree(service, root);
     }
