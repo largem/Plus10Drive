@@ -1,9 +1,12 @@
 
 import java.io.*;
 import com.google.api.services.drive.Drive;
-import com.plus10.gdwhse.*;
+import com.plus10.drive.*;
+import javafx.application.Application;
+import javafx.stage.Stage;
 
-public class Plus10Drive {
+
+public class Plus10Drive extends Application {
 
     private static void TestUpLoad(Drive service) throws IOException {
         final String filePath = "/Work/temp/Plus10Drive/P1070953.JPG";
@@ -26,7 +29,7 @@ public class Plus10Drive {
     public static void main(String[] args) throws IOException {
         // Build a new authorized API client service.
 
-        Drive service = GDSWrapper.getDriveService();
+        /*Drive service = GDSWrapper.getDriveService();
 
         //TestUpLoad(service);
         //TestDownload(service);
@@ -36,5 +39,13 @@ public class Plus10Drive {
 
         GDNode root = new GDNode("root", "Plus10 Drive", 0, 0, false);
         Plus10DriveHelper.populateNodeTree(service, root);
+        */
+
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+
     }
 }
