@@ -8,9 +8,9 @@ import java.util.List;
  * Created by Administrator on 26/05/2016.
  */
 interface IEncodeResult {
-    public String getRoot();
-    public MetaData[] getMetaData();
-    public MetaData getSrcMetaData();
+    String getRoot();
+    MetaData[] getMetaData();
+    MetaData getSrcMetaData();
 }
 
 

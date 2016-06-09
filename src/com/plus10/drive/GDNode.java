@@ -5,11 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by Administrator on 06/06/2016.
- */
-public class GDNode {
-    private List<GDNode> childern;
+public class GDNode implements IGDNode {
+    private List<GDNode> children;
     private String id;
     private boolean isFolder;       //so far we only scan folders. this flag is for future
     private boolean isP10Item;      //plus10 item is a folder
@@ -28,11 +25,11 @@ public class GDNode {
         this.size = size;
         this.isP10Item =isP10Item;
         this.isFolder = true;
-        childern = new ArrayList<GDNode>();
+        children = new ArrayList<GDNode>();
     }
 
     public void addChild(GDNode node) {
-        childern.add(node);
+        children.add(node);
     }
 
     public String getId() {
@@ -53,5 +50,12 @@ public class GDNode {
 
     public Date getMtime() {
         return mtime;
+    }
+
+    public IGDNode[] getChildren() { return children.toArray(new GDNode[0]); }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }

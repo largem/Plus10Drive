@@ -1,6 +1,5 @@
 
 import java.io.*;
-import com.google.api.services.drive.Drive;
 import com.plus10.drive.*;
 import com.plus10.drive.UI.DriveItem;
 import javafx.application.Application;
@@ -8,6 +7,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 
 public class Plus10Drive extends Application {
 
+    /*
     private static void TestUpLoad(Drive service) throws IOException {
         final String filePath = "/Work/temp/Plus10Drive/P1070953.JPG";
 
@@ -35,6 +36,7 @@ public class Plus10Drive extends Application {
         Plus10DriveHelper.download(service, appFolderId, filePath, "/Work/temp/Plus10Drive/New Pic.JPG");
     }
 
+   */
     public static void main(String[] args) throws IOException {
         // Build a new authorized API client service.
 
@@ -54,39 +56,44 @@ public class Plus10Drive extends Application {
     }
 
     private Stage window;
-    private TreeView<String> driveTree;
+    private TreeView<IGDNode> driveTree;
     private TableView<DriveItem> driveTable;
-    private Drive service;
     private Button connectBtn;
     private Label statusLabel;
+    private Plus10DriveService service;
+    private TextField inputText;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         window = primaryStage;
         window.setTitle("Plus10 Drive");
-        window.setWidth(800);
-        window.setHeight(600);
+        //window.setWidth(800);
+        //window.setHeight(600);
 
         BorderPane mainPane = new BorderPane();
         mainPane.setPadding(new Insets(10, 10, 10, 10));
 
         //Hbox on the top
         HBox hbox = new HBox();
+        hbox.setSpacing(5);
         connectBtn = new Button("Connect to Drive");
         connectBtn.setOnAction(e -> connectDrive());
-        hbox.getChildren().addAll(connectBtn);
+        Button createDirBtn = new Button("Create Folder");
+        createDirBtn.setOnAction(e -> createFolder());
+        inputText = new TextField();
+        hbox.getChildren().addAll(connectBtn, createDirBtn, inputText);
         mainPane.setTop(hbox);
 
         //Tree on the left
-        TreeItem<String> root = new TreeItem<>("Plus10 Drive");
-        root.setExpanded(true);
-        driveTree = new TreeView<>(root);
+        //TreeItem<String> root = new TreeItem<>("Plus10 Drive");
+        //root.setExpanded(true);
+        driveTree = new TreeView<>();
         mainPane.setLeft(driveTree);
 
         //Table on the center (along with some buttons)
         HBox hbox1 = new HBox();
         hbox1.setPadding(new Insets(0, 10, 0, 0));
-        hbox1.setSpacing(10);
+        hbox1.setSpacing(5);
         Button uploadBtn = new Button("Upload");
         Button downloadBtn = new Button("Download");
         Button propertyBtn = new Button("Property");
@@ -122,20 +129,49 @@ public class Plus10Drive extends Application {
         hBoxStatus.getChildren().addAll(status, statusLabel);
         mainPane.setBottom(hBoxStatus);
 
-        Scene scene = new Scene(mainPane);
+        Scene scene = new Scene(mainPane, 800, 600);
         window.setScene(scene);
         window.show();
     }
 
     public void connectDrive() {
         try {
-            service = GDSWrapper.getDriveService();
+            service = new Plus10DriveService();
+            IGDNode root = service.getPlus10DriveNode();
+            TreeItem<IGDNode> r = new TreeItem<>(root);
+            driveTree.setRoot(r);
+            populateNodeTree(r, root);
+
             connectBtn.setDisable(true);
             statusLabel.setText("Connected");
         }catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    public void createFolder() {
+        TreeItem<IGDNode> node = driveTree.getSelectionModel().getSelectedItem();
+        String folderName = inputText.getText();
+        TreeItem<IGDNode> newNode = new TreeItem<>(service.createFolder(node.getValue().getId(), folderName));
+        node.getChildren().add(newNode);
+        inputText.clear();
+    }
+
+    private void populateNodeTree(TreeItem<IGDNode> treeNode, IGDNode gdNode) {
+        if (gdNode != null) {
+            IGDNode[] children = gdNode.getChildren();
+            if (children!=null) {
+                for (IGDNode child : children) {
+                    if (!child.isP10Item()) {
+                        TreeItem<IGDNode> me = new TreeItem<>(child);
+                        treeNode.getChildren().add(me);
+                        populateNodeTree(me, child);
+                    } else {
+                        //add it to tableview, or wait until the node is selected
+                    }
+                }
+            }
+        }
     }
 
 }
