@@ -2,7 +2,16 @@
 import java.io.*;
 import com.google.api.services.drive.Drive;
 import com.plus10.drive.*;
+import com.plus10.drive.UI.DriveItem;
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 
@@ -44,8 +53,89 @@ public class Plus10Drive extends Application {
         launch(args);
     }
 
+    private Stage window;
+    private TreeView<String> driveTree;
+    private TableView<DriveItem> driveTable;
+    private Drive service;
+    private Button connectBtn;
+    private Label statusLabel;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
+        window = primaryStage;
+        window.setTitle("Plus10 Drive");
+        window.setWidth(800);
+        window.setHeight(600);
+
+        BorderPane mainPane = new BorderPane();
+        mainPane.setPadding(new Insets(10, 10, 10, 10));
+
+        //Hbox on the top
+        HBox hbox = new HBox();
+        connectBtn = new Button("Connect to Drive");
+        connectBtn.setOnAction(e -> connectDrive());
+        hbox.getChildren().addAll(connectBtn);
+        mainPane.setTop(hbox);
+
+        //Tree on the left
+        TreeItem<String> root = new TreeItem<>("Plus10 Drive");
+        root.setExpanded(true);
+        driveTree = new TreeView<>(root);
+        mainPane.setLeft(driveTree);
+
+        //Table on the center (along with some buttons)
+        HBox hbox1 = new HBox();
+        hbox1.setPadding(new Insets(0, 10, 0, 0));
+        hbox1.setSpacing(10);
+        Button uploadBtn = new Button("Upload");
+        Button downloadBtn = new Button("Download");
+        Button propertyBtn = new Button("Property");
+        Button previewBtn = new Button("Preview");
+        hbox1.getChildren().addAll(uploadBtn, downloadBtn, propertyBtn, previewBtn);
+
+        //create Table Columns
+        TableColumn<DriveItem, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setMinWidth(200);
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        TableColumn<DriveItem, String> dateColumn = new TableColumn<>("Date");
+        dateColumn.setMinWidth(80);
+        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+
+        TableColumn<DriveItem, Integer> sizeColumn = new TableColumn<>("Size");
+        sizeColumn.setMinWidth(60);
+        sizeColumn.setCellValueFactory(new PropertyValueFactory<>("size"));
+
+        driveTable = new TableView<>();
+        driveTable.getColumns().addAll(nameColumn, dateColumn, sizeColumn);
+
+        VBox vbox = new VBox();
+        vbox.setVgrow(driveTable, Priority.ALWAYS);
+        vbox.getChildren().addAll(hbox1, driveTable);
+
+        mainPane.setCenter(vbox);
+
+        Label status = new Label("Status:");
+        statusLabel = new Label("Not Connected");
+        HBox hBoxStatus = new HBox();
+        hBoxStatus.setSpacing(5);
+        hBoxStatus.getChildren().addAll(status, statusLabel);
+        mainPane.setBottom(hBoxStatus);
+
+        Scene scene = new Scene(mainPane);
+        window.setScene(scene);
+        window.show();
+    }
+
+    public void connectDrive() {
+        try {
+            service = GDSWrapper.getDriveService();
+            connectBtn.setDisable(true);
+            statusLabel.setText("Connected");
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
+
 }
