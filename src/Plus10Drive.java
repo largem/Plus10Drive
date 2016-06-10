@@ -7,7 +7,6 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -49,7 +48,7 @@ public class Plus10Drive extends Application {
         GDOperations.renameFolder(service, appFolderId, "Plus10Drive");
 
         GDNode root = new GDNode("root", "Plus10 Drive", 0, 0, false);
-        Plus10DriveHelper.populateNodeTree(service, root);
+        Plus10DriveHelper.populateP10Drive(service, root);
         */
 
         launch(args);
@@ -140,7 +139,7 @@ public class Plus10Drive extends Application {
             IGDNode root = service.getPlus10DriveNode();
             TreeItem<IGDNode> r = new TreeItem<>(root);
             driveTree.setRoot(r);
-            populateNodeTree(r, root);
+            populateP10Drive(r, root);
 
             connectBtn.setDisable(true);
             statusLabel.setText("Connected");
@@ -157,7 +156,7 @@ public class Plus10Drive extends Application {
         inputText.clear();
     }
 
-    private void populateNodeTree(TreeItem<IGDNode> treeNode, IGDNode gdNode) {
+    private void populateP10Drive(TreeItem<IGDNode> treeNode, IGDNode gdNode) {
         if (gdNode != null) {
             IGDNode[] children = gdNode.getChildren();
             if (children!=null) {
@@ -165,7 +164,7 @@ public class Plus10Drive extends Application {
                     if (!child.isP10Item()) {
                         TreeItem<IGDNode> me = new TreeItem<>(child);
                         treeNode.getChildren().add(me);
-                        populateNodeTree(me, child);
+                        populateP10Drive(me, child);
                     } else {
                         //add it to tableview, or wait until the node is selected
                     }
