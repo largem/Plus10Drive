@@ -52,7 +52,6 @@ public class Plus10DriveHelper {
 
     private static void uploadEncodedFiles(Drive service, String gdParent, EncodeResult res) {
         final String root = res.getRoot();
-
         int retry=0;
         while (retry++ < RETRY) {
             int count = 0;
@@ -102,7 +101,7 @@ public class Plus10DriveHelper {
         return res;
     }
 
-    public static void upload(Drive service, String gdParent, String filePath) throws IOException {
+    public static String upload(Drive service, String gdParent, String filePath) throws IOException {
 
         java.io.File f = new java.io.File(filePath);
         if (!f.exists()) {
@@ -122,7 +121,7 @@ public class Plus10DriveHelper {
         String mateDataPath = UPLOAD_TEMP + "/" + METADATA_FILE;
         res.dump(mateDataPath);
 
-        GDOperations.uploadFile(service, uploadFolderId, METADATA_FILE, mateDataPath);
+        return GDOperations.uploadFile(service, uploadFolderId, METADATA_FILE, mateDataPath);
 
         //TODO, remove all the temp files
     }

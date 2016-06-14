@@ -40,5 +40,14 @@ public class Plus10DriveService {
         return newNode;
     }
 
+    public String uploadFile(String parent, String fileToUpload) {
+        try {
+            return Plus10DriveHelper.upload(service, parent, fileToUpload);
+        }catch(IOException e) {
+
+        }
+        return null;
+    }
+
     public Drive getDriveService() {return service; }
 }

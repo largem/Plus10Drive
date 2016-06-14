@@ -18,6 +18,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 
@@ -146,7 +147,6 @@ public class Plus10Drive extends Application {
         window.show();
     }
 
-
     private void connectDrive() {
         try {
             service = new Plus10DriveService();
@@ -194,7 +194,21 @@ public class Plus10Drive extends Application {
     }
 
     private void uploadBtnClicked() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Upload File");
+        File file = fileChooser.showOpenDialog(window);
 
+        if (file != null) {
+            System.out.println(file.getAbsolutePath());
+            IGDNode selectedNode = driveTree.getSelectionModel().getSelectedItem().getValue();
+            String id = service.uploadFile(selectedNode.getId(),
+                                           file.getAbsolutePath());
+            Date now = new Date();
+            GDNode newNode = new GDNode(id, file.getName(), now.getTime(), file.length(), true);
+            ((GDNode)selectedNode).addChild(newNode);
+
+            driveTable.setItems(FXCollections.observableList(Arrays.asList(selectedNode.getChildren())));
+        }
     }
 
 }
