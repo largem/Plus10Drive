@@ -1,8 +1,15 @@
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+
 import com.plus10.drive.*;
 import com.plus10.drive.UI.DriveItem;
 import javafx.application.Application;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -56,7 +63,7 @@ public class Plus10Drive extends Application {
 
     private Stage window;
     private TreeView<IGDNode> driveTree;
-    private TableView<DriveItem> driveTable;
+    private TableView<IGDNode> driveTable;
     private Button connectBtn;
     private Label statusLabel;
     private Plus10DriveService service;
@@ -87,6 +94,8 @@ public class Plus10Drive extends Application {
         //TreeItem<String> root = new TreeItem<>("Plus10 Drive");
         //root.setExpanded(true);
         driveTree = new TreeView<>();
+        driveTree.getSelectionModel().selectedItemProperty()
+                .addListener((v, oldValue, newValue) -> driveTreeItemSelected(v, oldValue, newValue));
         mainPane.setLeft(driveTree);
 
         //Table on the center (along with some buttons)
@@ -94,25 +103,29 @@ public class Plus10Drive extends Application {
         hbox1.setPadding(new Insets(0, 10, 0, 0));
         hbox1.setSpacing(5);
         Button uploadBtn = new Button("Upload");
+        uploadBtn.setOnAction(e -> uploadBtnClicked());
         Button downloadBtn = new Button("Download");
         Button propertyBtn = new Button("Property");
         Button previewBtn = new Button("Preview");
         hbox1.getChildren().addAll(uploadBtn, downloadBtn, propertyBtn, previewBtn);
 
         //create Table Columns
-        TableColumn<DriveItem, String> nameColumn = new TableColumn<>("Name");
+        TableColumn<IGDNode, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setMinWidth(200);
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-        TableColumn<DriveItem, String> dateColumn = new TableColumn<>("Date");
+        TableColumn<IGDNode, String> dateColumn = new TableColumn<>("Date");
         dateColumn.setMinWidth(80);
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+        dateColumn.setCellValueFactory(new PropertyValueFactory<>("mtime"));
 
-        TableColumn<DriveItem, Integer> sizeColumn = new TableColumn<>("Size");
+        TableColumn<IGDNode, Long> sizeColumn = new TableColumn<>("Size");
         sizeColumn.setMinWidth(60);
         sizeColumn.setCellValueFactory(new PropertyValueFactory<>("size"));
 
         driveTable = new TableView<>();
+        ObservableList<IGDNode> items = FXCollections.observableArrayList();
+        items.add(new GDNode("abc", "name1", (new Date()).getTime(), 100, true));
+        driveTable.setItems(items);
         driveTable.getColumns().addAll(nameColumn, dateColumn, sizeColumn);
 
         VBox vbox = new VBox();
@@ -133,7 +146,8 @@ public class Plus10Drive extends Application {
         window.show();
     }
 
-    public void connectDrive() {
+
+    private void connectDrive() {
         try {
             service = new Plus10DriveService();
             IGDNode root = service.getPlus10DriveNode();
@@ -148,7 +162,7 @@ public class Plus10Drive extends Application {
         }
     }
 
-    public void createFolder() {
+    private void createFolder() {
         TreeItem<IGDNode> node = driveTree.getSelectionModel().getSelectedItem();
         String folderName = inputText.getText();
         TreeItem<IGDNode> newNode = new TreeItem<>(service.createFolder(node.getValue().getId(), folderName));
@@ -171,6 +185,16 @@ public class Plus10Drive extends Application {
                 }
             }
         }
+    }
+
+    private void driveTreeItemSelected(ObservableValue<? extends TreeItem<IGDNode>> v, TreeItem<IGDNode> oldValue, TreeItem<IGDNode> newValue) {
+        driveTable.setItems(FXCollections.observableList(Arrays.asList(newValue.getValue().getChildren())));
+
+        System.out.println(oldValue +" "+newValue);
+    }
+
+    private void uploadBtnClicked() {
+
     }
 
 }
