@@ -16,11 +16,15 @@ import java.util.Map;
  * Created by Administrator on 27/05/2016.
  */
 public final class GDOperations {
-    static String uploadFile(Drive service, String parent, String title, String file2Upload) {
+
+    static String uploadFile(Drive service, String parent, String title, String file2Upload, Map<String, String> props) {
         File fileMetadata = new File();
         fileMetadata.setName(title);
         fileMetadata.setMimeType("application/vnd.google-apps.document");  //https://developers.google.com/drive/v3/web/mime-types
         fileMetadata.setParents(Collections.singletonList(parent));
+        if (props!= null && !props.isEmpty()) {
+            fileMetadata.setAppProperties(props);
+        }
 
         java.io.File filePath = new java.io.File(file2Upload);
         FileContent mediaContent = new FileContent("text/plain", filePath);
@@ -44,12 +48,19 @@ public final class GDOperations {
         return null;
     }
 
-    public static String createFolder(Drive service, String parent, String title) throws IOException
+    public static String createFolder(Drive service, String parent, String title) throws IOException {
+        return createFolder(service, parent, title, null);
+    }
+
+    public static String createFolder(Drive service, String parent, String title, Map<String, String> props) throws IOException
     {
         File fileMetadata = new File();
         fileMetadata.setName(title);
         fileMetadata.setMimeType("application/vnd.google-apps.folder");
         fileMetadata.setParents(Collections.singletonList(parent));
+        if (props != null && !props.isEmpty()) {
+            fileMetadata.setAppProperties(props);
+        }
 
         File file = service.files().create(fileMetadata)
                             .setFields("id")
@@ -79,6 +90,17 @@ public final class GDOperations {
             return file.getId();
         }
 
+        return null;
+    }
+
+    public static String updateProperty(Drive service, String id, Map<String, String> props) {
+        try {
+            File metaData = new File();
+            metaData.setAppProperties(props);
+
+            File file = service.files().update(id, metaData).execute();
+            return file.getId();
+        }catch (IOException e) {}
         return null;
     }
 

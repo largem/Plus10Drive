@@ -6,7 +6,9 @@ import com.google.api.services.drive.model.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 06/06/2016.
@@ -21,6 +23,12 @@ public class Plus10DriveHelper {
         return GDOperations.fileExist(service, parentId, METADATA_FILE);
     }
 
+    private static Boolean isPlusItem(File metaData) {
+        Map<String, String> props = metaData.getAppProperties();
+
+        return props.containsKey(Config.APPLICATION_NAME);
+    }
+
     private static long getPlusItemSize(Drive service, String id) {
         return 0;
     }
@@ -32,7 +40,7 @@ public class Plus10DriveHelper {
         if (subFolders != null && subFolders.size() > 0) {
             for (File d : subFolders) {
                 String id = d.getId();
-                Boolean isPlus10Item =plus10MetaExist(service, id);
+                Boolean isPlus10Item =isPlusItem(d);
                 long size = 0;
                 if (isPlus10Item) size = getPlusItemSize(service, id);
                 GDNode child = new GDNode(id, d.getName(), 0, size, isPlus10Item);
@@ -59,7 +67,10 @@ public class Plus10DriveHelper {
                 String path = root + "/" + md.getName();
                 System.out.println("Uploading " + md.getName() + ", retry=" + new Integer(retry).toString());
                 if (!GDOperations.fileExist(service, gdParent, md.getName())) {
-                    GDOperations.uploadFile(service, gdParent, md.getName(), path);
+                    Map<String, String> props = new HashMap<>();
+                    props.put("Size", Integer.toString(md.getSize()));
+                    props.put("Hash", md.getMd5());
+                    GDOperations.uploadFile(service, gdParent, md.getName(), path, props);
                 } else {
                     count++;
                     System.out.println("Upload " + md.getName() + " successfully.");
@@ -113,15 +124,23 @@ public class Plus10DriveHelper {
             throw new FileAlreadyExistsException(fileName);
         }
 
-        String uploadFolderId = GDOperations.createFolder(service, gdParent, fileName);
-
         EncodeResult res = FileEncoder.encode(filePath, UPLOAD_TEMP);
+
+        final MetaData md = res.getSrcMetaData();
+        Map<String, String> props = new HashMap<>();
+        props.put(Config.APPLICATION_NAME, "true");
+        props.put("Size", Integer.toString(md.getSize()));
+        props.put("Hash", md.getMd5());
+        props.put("Count", Integer.toString(res.getMetaData().length));
+
+        String uploadFolderId = GDOperations.createFolder(service, gdParent, fileName, props);
+
         uploadEncodedFiles(service, uploadFolderId, res);
 
         String mateDataPath = UPLOAD_TEMP + "/" + METADATA_FILE;
         res.dump(mateDataPath);
 
-        return GDOperations.uploadFile(service, uploadFolderId, METADATA_FILE, mateDataPath);
+        return GDOperations.uploadFile(service, uploadFolderId, METADATA_FILE, mateDataPath, null);
 
         //TODO, remove all the temp files
     }
