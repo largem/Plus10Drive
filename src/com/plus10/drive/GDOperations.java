@@ -29,6 +29,7 @@ public final class GDOperations {
 
         java.io.File filePath = new java.io.File(file2Upload);
         FileContent mediaContent = new FileContent("text/plain", filePath);
+        mediaContent.setCloseInputStream(true);
         File file = null;
         try {
             file = service.files().create(fileMetadata, mediaContent)
@@ -39,6 +40,7 @@ public final class GDOperations {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         if (file != null) {
             //System.out.println("File ID: " + file.getId());
             return file.getId();

@@ -6,6 +6,9 @@ import com.google.api.services.drive.model.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,12 +147,21 @@ public class Plus10DriveHelper {
 
         uploadEncodedFiles(service, uploadFolderId, res);
 
-        String mateDataPath = UPLOAD_TEMP + "/" + METADATA_FILE;
-        res.dump(mateDataPath);
+        String metaDataPath = UPLOAD_TEMP + "/" + METADATA_FILE;
+        res.dump(metaDataPath);
 
-        return GDOperations.uploadFile(service, uploadFolderId, METADATA_FILE, mateDataPath, null);
+        GDOperations.uploadFile(service, uploadFolderId, METADATA_FILE, metaDataPath, null);
 
-        //TODO, remove all the temp files
+        try {
+            //delete all temporary files
+            Files.delete(Paths.get(metaDataPath));
+            for (MetaData metaData : res.getMetaData()) {
+                Files.delete(Paths.get(UPLOAD_TEMP + "/" + metaData.getName()));
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return uploadFolderId;
     }
 
     public static void download(Drive service, String gdParent, String fileName, String targetFile) throws IOException{

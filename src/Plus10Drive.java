@@ -145,6 +145,7 @@ public class Plus10Drive extends Application {
             TreeItem<IGDNode> r = new TreeItem<>(root);
             driveTree.setRoot(r);
             populateP10Drive(r, root);
+            r.setExpanded(true);
 
             connectBtn.setDisable(true);
             statusLabel.setText("Connected");

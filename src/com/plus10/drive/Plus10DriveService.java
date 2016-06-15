@@ -44,7 +44,7 @@ public class Plus10DriveService {
         try {
             return Plus10DriveHelper.upload(service, parent, fileToUpload);
         }catch(IOException e) {
-
+            e.printStackTrace();
         }
         return null;
     }
