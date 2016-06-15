@@ -25,8 +25,10 @@ public class Plus10DriveHelper {
 
     private static Boolean isPlusItem(File metaData) {
         Map<String, String> props = metaData.getAppProperties();
-
-        return props.containsKey(Config.APPLICATION_NAME);
+        if (props != null) {
+            return props.containsKey(Config.APPLICATION_NAME);
+        }
+        return false;
     }
 
     private static long getPlusItemSize(Drive service, String id) {
@@ -152,5 +154,11 @@ public class Plus10DriveHelper {
         FileEncoder.decode(res1, targetFile);
 
         //TODO, remove all the temp files
+    }
+
+    public static void download(Drive service, String id, java.io.File targetFile) throws IOException{
+        EncodeResult res1 = downloadEncodedFiles(service, id, DOWNLOAD_TEMP);
+        FileEncoder.decode(res1, targetFile);
+
     }
 }

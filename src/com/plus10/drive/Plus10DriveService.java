@@ -49,5 +49,15 @@ public class Plus10DriveService {
         return null;
     }
 
+    public void deleteFile(String id) {
+        GDOperations.deleteFile(service, id);
+    }
+
+    public void downloadFile(String id, java.io.File dest) {
+        try {
+            Plus10DriveHelper.download(service, id, dest);
+        }catch(IOException e) {}
+    }
+
     public Drive getDriveService() {return service; }
 }

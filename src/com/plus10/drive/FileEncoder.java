@@ -81,7 +81,12 @@ public class FileEncoder {
         return res;
     }
 
-    public static void decode(IEncodeResult res, String decodeFile) {
+    public static void decode(IEncodeResult res, String decodePath) {
+        File decodeFile = new File(decodePath);
+        decode(res, decodeFile);
+    }
+
+    public static void decode(IEncodeResult res, File decodeFile) {
         try (OutputStream out = new BufferedOutputStream(new FileOutputStream(decodeFile))) {
             String rootEncFiles = res.getRoot();
 

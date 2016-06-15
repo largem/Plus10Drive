@@ -4,6 +4,7 @@ import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import java.io.*;
 import java.net.SocketTimeoutException;
@@ -127,6 +128,14 @@ public final class GDOperations {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static void deleteFile(Drive service, String id) {
+        try {
+            service.files().delete(id).execute();
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     static List<File> getSubFolders(Drive service, String parentId) {

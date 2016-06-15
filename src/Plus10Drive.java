@@ -45,20 +45,6 @@ public class Plus10Drive extends Application {
 
    */
     public static void main(String[] args) throws IOException {
-        // Build a new authorized API client service.
-
-        /*Drive service = GDSWrapper.getDriveService();
-
-        //TestUpLoad(service);
-        //TestDownload(service);
-
-        String appFolderId = GDOperations.getFolderId(service, "root", "Plus10Drive");
-        GDOperations.renameFolder(service, appFolderId, "Plus10Drive");
-
-        GDNode root = new GDNode("root", "Plus10 Drive", 0, 0, false);
-        Plus10DriveHelper.populateP10Drive(service, root);
-        */
-
         launch(args);
     }
 
@@ -69,6 +55,8 @@ public class Plus10Drive extends Application {
     private Label statusLabel;
     private Plus10DriveService service;
     private TextField inputText;
+    private File previousUploadFolder=null;
+    private File previousDownloadFolder=null;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -106,9 +94,12 @@ public class Plus10Drive extends Application {
         Button uploadBtn = new Button("Upload");
         uploadBtn.setOnAction(e -> uploadBtnClicked());
         Button downloadBtn = new Button("Download");
+        downloadBtn.setOnAction(e -> downloadBtnClicked());
         Button propertyBtn = new Button("Property");
         Button previewBtn = new Button("Preview");
-        hbox1.getChildren().addAll(uploadBtn, downloadBtn, propertyBtn, previewBtn);
+        Button deleteBtn = new Button("Delete");
+        deleteBtn.setOnAction(e -> deleteBtnClicked());
+        hbox1.getChildren().addAll(uploadBtn, downloadBtn, propertyBtn, previewBtn, deleteBtn);
 
         //create Table Columns
         TableColumn<IGDNode, String> nameColumn = new TableColumn<>("Name");
@@ -125,7 +116,7 @@ public class Plus10Drive extends Application {
 
         driveTable = new TableView<>();
         ObservableList<IGDNode> items = FXCollections.observableArrayList();
-        items.add(new GDNode("abc", "name1", (new Date()).getTime(), 100, true));
+        //items.add(new GDNode("abc", "name1", (new Date()).getTime(), 100, true));
         driveTable.setItems(items);
         driveTable.getColumns().addAll(nameColumn, dateColumn, sizeColumn);
 
@@ -165,9 +156,12 @@ public class Plus10Drive extends Application {
     private void createFolder() {
         TreeItem<IGDNode> node = driveTree.getSelectionModel().getSelectedItem();
         String folderName = inputText.getText();
-        TreeItem<IGDNode> newNode = new TreeItem<>(service.createFolder(node.getValue().getId(), folderName));
-        node.getChildren().add(newNode);
+        IGDNode newNode = service.createFolder(node.getValue().getId(), folderName);
+        ((GDNode)node.getValue()).addChild(newNode);
+        TreeItem<IGDNode> newTreeNode = new TreeItem<>(newNode);
+        node.getChildren().add(newTreeNode);
         inputText.clear();
+        driveTable.setItems(FXCollections.observableList(Arrays.asList(node.getValue().getChildren())));
     }
 
     private void populateP10Drive(TreeItem<IGDNode> treeNode, IGDNode gdNode) {
@@ -195,11 +189,15 @@ public class Plus10Drive extends Application {
 
     private void uploadBtnClicked() {
         FileChooser fileChooser = new FileChooser();
+        if (previousUploadFolder != null) {
+            fileChooser.setInitialDirectory(previousUploadFolder);
+        }
         fileChooser.setTitle("Upload File");
         File file = fileChooser.showOpenDialog(window);
 
         if (file != null) {
             System.out.println(file.getAbsolutePath());
+            previousUploadFolder = file.getParentFile();
             IGDNode selectedNode = driveTree.getSelectionModel().getSelectedItem().getValue();
             String id = service.uploadFile(selectedNode.getId(),
                                            file.getAbsolutePath());
@@ -211,4 +209,39 @@ public class Plus10Drive extends Application {
         }
     }
 
+    private void deleteBtnClicked() {
+        IGDNode node = driveTable.getSelectionModel().getSelectedItem();
+        TreeItem<IGDNode> parentNode = driveTree.getSelectionModel().getSelectedItem();
+        if (node != null) {
+            service.deleteFile(node.getId());
+            ((GDNode)parentNode.getValue()).removeChild(node);
+            driveTable.setItems(FXCollections.observableList(Arrays.asList(parentNode.getValue().getChildren())));
+            if (!node.isP10Item()) {
+                for (TreeItem<IGDNode> child :  parentNode.getChildren()) {
+                    if (child.getValue() == node) {
+                        parentNode.getChildren().remove(child);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void downloadBtnClicked(){
+        IGDNode downloadItem = driveTable.getSelectionModel().getSelectedItem();
+
+        FileChooser fileChooser = new FileChooser();
+
+        if (previousDownloadFolder != null) {
+            fileChooser.setInitialDirectory(previousDownloadFolder);
+        }
+        fileChooser.setTitle("Save to");
+        fileChooser.setInitialFileName(downloadItem.getName());
+        File downloadFile = fileChooser.showSaveDialog(window);
+
+        if (downloadFile != null) {
+            previousDownloadFolder = downloadFile.getParentFile();
+            service.downloadFile(downloadItem.getId(), downloadFile);
+        }
+    }
 }

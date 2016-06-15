@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 public class GDNode implements IGDNode {
-    private List<GDNode> children;
+    private List<IGDNode> children;
     private String id;
     private boolean isFolder;       //so far we only scan folders. this flag is for future
     private boolean isP10Item;      //plus10 item is a folder
@@ -25,12 +25,14 @@ public class GDNode implements IGDNode {
         this.size = size;
         this.isP10Item =isP10Item;
         this.isFolder = true;
-        children = new ArrayList<GDNode>();
+        children = new ArrayList<IGDNode>();
     }
 
-    public void addChild(GDNode node) {
+    public void addChild(IGDNode node) {
         children.add(node);
     }
+
+    public void removeChild(IGDNode node) { children.remove(node); }
 
     public String getId() {
         return id;
