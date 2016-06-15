@@ -31,7 +31,13 @@ public class Plus10DriveHelper {
         return false;
     }
 
-    private static long getPlusItemSize(Drive service, String id) {
+    private static long getPlusItemSize(File plus10Item) {
+        Map<String, String> props = plus10Item.getAppProperties();
+        try {
+            if (props.containsKey("Size")) {
+                return Long.parseLong(props.get("Size"));
+            }
+        }catch(Exception e) {}
         return 0;
     }
 
@@ -43,9 +49,8 @@ public class Plus10DriveHelper {
             for (File d : subFolders) {
                 String id = d.getId();
                 Boolean isPlus10Item =isPlusItem(d);
-                long size = 0;
-                if (isPlus10Item) size = getPlusItemSize(service, id);
-                GDNode child = new GDNode(id, d.getName(), 0, size, isPlus10Item);
+                long size = isPlus10Item ? getPlusItemSize(d):0;
+                GDNode child = new GDNode(id, d.getName(), d.getModifiedTime().getValue(), size, isPlus10Item);
                 parent.addChild(child);
                 if (!isPlus10Item) {
                     populateNodeTree(service, child);
